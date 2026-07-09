@@ -6,14 +6,20 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     """从 .env 读取配置。字段名大小写不敏感，自动匹配 .env 中的变量。"""
 
+    # ===== App =====
+    app_name: str = "pang-agent"
+    app_env: str = "local"
+    log_level: str = "INFO"
+    database_url: str = "postgresql+asyncpg://postgres:postgres@192.168.1.51:5432/pang_agent"
+
     # ===== DeepSeek =====
-    deepseek_api_key: str
+    deepseek_api_key: str = ""
     deepseek_base_url: str = "https://api.deepseek.com"
     deepseek_model: str = "deepseek-chat"
 
     # ===== LangSmith =====
     langsmith_tracing: bool = True
-    langsmith_api_key: str
+    langsmith_api_key: str = ""
     langsmith_project: str = "pang-agent-home"
     langsmith_endpoint: str = "https://api.smith.langchain.com"
 
