@@ -1,10 +1,14 @@
 from langgraph.graph import END, START, StateGraph
 
+from app.agent.llm import invoke_llm
 from app.agent.state import AgentState
+from app.config import settings
 
 
 def echo_node(state: AgentState) -> dict[str, str]:
-    # ponytail: deterministic stub; replace this node with real LLM/tool logic later.
+    # ponytail: no key keeps local tests deterministic; real key switches to LLM.
+    if settings.llm_api_key:
+        return {"reply": invoke_llm(state["message"])}
     return {"reply": f"pang-agent received: {state['message']}"}
 
 

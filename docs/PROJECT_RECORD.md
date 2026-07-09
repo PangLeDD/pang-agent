@@ -21,8 +21,12 @@
 - `app/core/database.py` owns SQLAlchemy `Base`, async engine, async session factory, and session dependency.
 - `app/core/security.py` owns the temporary Bearer token authentication stub.
 - `app/api/users.py` exposes `GET /users/me` as the protected smoke endpoint.
-- `app/agent/graph.py` owns the minimal LangGraph invoke flow.
+- `app/agent/graph.py` owns the LangGraph invoke flow with LLM branch and echo fallback.
 - `app/agent/llm.py` owns the OpenAI-compatible LLM client factory.
+- `app/agent/prompt.py` owns the minimal system/user prompt builder.
+- `app/agent/schema.py` owns Agent request/response DTOs.
+- `app/core/exceptions.py` owns unified error responses: `{code, message, data}`.
+- `app/core/response.py` owns unified success/error response payload helpers.
 - `app/api/agent.py` exposes protected `POST /agent/invoke`.
 - `alembic/env.py` reads `settings.database_url` and `Base.metadata`.
 
@@ -45,6 +49,8 @@ API keys stay empty in templates and local `.env` until manually filled.
 - `tests/test_auth_stub.py` checks missing, wrong, and correct Bearer token behavior.
 - `tests/test_agent_invoke.py` checks protected LangGraph invoke behavior.
 - `tests/test_llm_client.py` checks missing LLM key behavior without making network calls.
+- `tests/test_prompt.py` checks prompt assembly and LLM message invocation shape.
+- `tests/test_exceptions.py` checks unified HTTP and validation error responses.
 
 ## Deferred
 

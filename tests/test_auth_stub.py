@@ -32,4 +32,7 @@ class AuthStubTest(unittest.TestCase):
         )
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), {"id": "dev-user", "username": "dev"})
+        self.assertEqual(
+            response.json(),
+            {"code": 200, "message": "ok", "data": {"id": "dev-user", "username": "dev"}},
+        )

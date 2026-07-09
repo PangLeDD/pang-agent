@@ -10,4 +10,7 @@ class HealthTest(unittest.TestCase):
         response = TestClient(app).get("/health")
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), {"status": "ok"})
+        self.assertEqual(
+            response.json(),
+            {"code": 200, "message": "ok", "data": {"status": "ok"}},
+        )
