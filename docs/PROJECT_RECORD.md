@@ -8,6 +8,7 @@
 - Migrations: Alembic.
 - Logging: Loguru.
 - Auth: RBAC later. For now use a hardcoded development Bearer token stub.
+- LLM provider: OpenAI-compatible chat API through LangChain `ChatOpenAI`; DeepSeek is only the current default endpoint/model.
 - RAG: reserved for a later slice.
 
 ## Current Foundation
@@ -20,6 +21,9 @@
 - `app/core/database.py` owns SQLAlchemy `Base`, async engine, async session factory, and session dependency.
 - `app/core/security.py` owns the temporary Bearer token authentication stub.
 - `app/api/users.py` exposes `GET /users/me` as the protected smoke endpoint.
+- `app/agent/graph.py` owns the minimal LangGraph invoke flow.
+- `app/agent/llm.py` owns the OpenAI-compatible LLM client factory.
+- `app/api/agent.py` exposes protected `POST /agent/invoke`.
 - `alembic/env.py` reads `settings.database_url` and `Base.metadata`.
 
 ## Environment
@@ -39,6 +43,8 @@ API keys stay empty in templates and local `.env` until manually filled.
 - `tests/test_health.py` checks `GET /health`.
 - `tests/test_database.py` checks database foundation imports without connecting to PostgreSQL.
 - `tests/test_auth_stub.py` checks missing, wrong, and correct Bearer token behavior.
+- `tests/test_agent_invoke.py` checks protected LangGraph invoke behavior.
+- `tests/test_llm_client.py` checks missing LLM key behavior without making network calls.
 
 ## Deferred
 
@@ -46,5 +52,6 @@ API keys stay empty in templates and local `.env` until manually filled.
 - Repository/service layers.
 - Real database connectivity tests.
 - Redis.
-- LangGraph Agent endpoints.
+- Real LLM-backed LangGraph Agent behavior.
+- Streaming LLM responses.
 - RAG.

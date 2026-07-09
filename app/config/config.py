@@ -12,10 +12,10 @@ class Settings(BaseSettings):
     log_level: str = "INFO"
     database_url: str = "postgresql+asyncpg://postgres:postgres@192.168.1.51:5432/pang_agent"
 
-    # ===== DeepSeek =====
-    deepseek_api_key: str = ""
-    deepseek_base_url: str = "https://api.deepseek.com"
-    deepseek_model: str = "deepseek-chat"
+    # ===== OpenAI-compatible LLM =====
+    llm_api_key: str = ""
+    llm_base_url: str = "https://api.deepseek.com"
+    llm_model: str = "deepseek-chat"
 
     # ===== LangSmith =====
     langsmith_tracing: bool = True
