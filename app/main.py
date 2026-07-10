@@ -1,7 +1,6 @@
 from fastapi import FastAPI
-
-from app.api.router import api_router
 from app.config import settings
+from app.api.router import api_router
 from app.core.exceptions import register_exception_handlers
 from app.core.logging import setup_logging
 from app.core.response import success

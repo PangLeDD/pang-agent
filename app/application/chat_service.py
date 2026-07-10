@@ -15,6 +15,7 @@ class ChatService:
     """
 
     def __init__(self, executor: AgentExecutor | None = None) -> None:
+        # 默认使用通用的 AgentExecutor
         self._executor = executor or AgentExecutor()
 
     async def stream(self, message: str, conversation_id: str | None = None) -> AsyncIterator[dict[str, str]]:
