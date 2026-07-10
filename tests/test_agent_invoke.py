@@ -1,4 +1,5 @@
 import unittest
+from uuid import UUID
 
 from fastapi.testclient import TestClient
 
@@ -26,14 +27,11 @@ class AgentInvokeTest(unittest.TestCase):
             settings.llm_api_key = old_key
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(
-            response.json(),
-            {
-                "code": 200,
-                "message": "ok",
-                "data": {"reply": "pang-agent received: hello", "conversation_id": None},
-            },
-        )
+        body = response.json()
+        self.assertEqual(body["code"], 200)
+        self.assertEqual(body["message"], "ok")
+        self.assertEqual(body["data"]["reply"], "pang-agent received: hello")
+        UUID(body["data"]["conversation_id"])
 
     def test_agent_invoke_keeps_conversation_id(self):
         old_key = settings.llm_api_key

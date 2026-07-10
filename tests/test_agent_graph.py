@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch
 
-from app.agent.graph import invoke_agent
+from app.agent import invoke_agent
 from app.config import settings
 
 

@@ -2,7 +2,7 @@ import unittest
 
 from fastapi.testclient import TestClient
 
-from app.agent.llm import get_llm
+from app.infrastructure.llm import get_llm
 from app.config import settings
 from app.core.security import DEV_AUTH_TOKEN
 from app.main import app

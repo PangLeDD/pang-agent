@@ -27,7 +27,10 @@
 - `app/agent/schema.py` owns Agent request/response DTOs.
 - `app/core/exceptions.py` owns unified error responses: `{code, message, data}`.
 - `app/core/response.py` owns unified success/error response payload helpers.
+- `app/core/sse.py` formats SSE events with the same `{code, message, data}` envelope.
 - `app/api/agent.py` exposes protected `POST /agent/invoke`.
+- `POST /agent/invoke` returns a `conversation_id`; missing IDs are generated with UUID4 and not persisted yet.
+- `POST /agent/stream` is the frontend-facing Agent message endpoint. SSE events use `meta`, `delta`, `done`, and `error`.
 - `alembic/env.py` reads `settings.database_url` and `Base.metadata`.
 
 ## Environment
@@ -60,4 +63,32 @@ API keys stay empty in templates and local `.env` until manually filled.
 - Redis.
 - Real LLM-backed LangGraph Agent behavior.
 - Streaming LLM responses.
+- Token-level LLM streaming; current SSE sends one delta per final reply.
+
+## SSE Protocol
+
+SSE events follow the `conversation.*` / `message.*` / `error` naming convention.
+Each data payload is wrapped in an AgentEvent envelope: `{id, timestamp, payload}`.
+
+The `{code, message, data}` structure is reserved for synchronous HTTP responses only.
+
+```text
+event: conversation.start
+data: {"id":"evt_...","timestamp":1720000000000,"payload":{"conversation_id":"..."}}
+
+event: message.delta
+data: {"id":"evt_...","timestamp":1720000000000,"payload":{"delta":"..."}}
+
+event: conversation.end
+data: {"id":"evt_...","timestamp":1720000000000,"payload":{"reason":"stop"}}
+
+event: error
+data: {"id":"evt_...","timestamp":1720000000000,"payload":{"code":500,"message":"Internal Server Error"}}
+```
+
+Reserved for future:
+- `agent.status` — Agent state transitions (planning, searching, executing)
+- `agent.thought` — Chain-of-thought visibility
+- `tool.call` / `tool.result` — Tool execution lifecycle
+
 - RAG.
