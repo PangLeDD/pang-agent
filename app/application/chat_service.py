@@ -31,14 +31,4 @@ class ChatService:
             yield sse_event(EventType.ERROR, {"code": 500, "message": "Internal Server Error"})
 
 
-def get_chat_service() -> ChatService:
-    """FastAPI 依赖注入提供商。
 
-    当前返回默认 ChatService（单例在模块级），
-    后续可按需返回不同配置的实例。”
-    """
-    return _chat_service
-
-
-# 模块级单例，需要不同配置时改依赖函数即可，调用方不动。
-_chat_service = ChatService()

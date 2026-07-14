@@ -1,18 +1,11 @@
 from langchain_openai import ChatOpenAI
 
 from app.agent.prompt import build_messages
-from app.config import settings
+from app.container import get_container
 
 
 def get_llm() -> ChatOpenAI:
-    if not settings.llm_api_key:
-        raise RuntimeError("LLM_API_KEY is not configured")
-    # OpenAI-compatible endpoint, so DeepSeek/Qwen/local gateways can swap by config.
-    return ChatOpenAI(
-        api_key=settings.llm_api_key,
-        base_url=settings.llm_base_url,
-        model=settings.llm_model,
-    )
+    return get_container().ai.llm
 
 
 def invoke_llm(message: str) -> str:
