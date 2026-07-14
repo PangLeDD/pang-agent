@@ -7,6 +7,4 @@ class AgentInvokeRequest(BaseModel):
     conversation_id: str | None = None
 
 
-class AgentInvokeResponse(BaseModel):
-    reply: str
-    conversation_id: str | None = None
+

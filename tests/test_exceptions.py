@@ -8,7 +8,7 @@ from app.main import app
 
 class ExceptionHandlerTest(unittest.TestCase):
     def test_http_exception_uses_unified_shape(self):
-        response = TestClient(app).post("/agent/invoke", json={"message": "hello"})
+        response = TestClient(app).post("/agent/stream", json={"message": "hello"})
 
         self.assertEqual(response.status_code, 401)
         self.assertEqual(
@@ -18,7 +18,7 @@ class ExceptionHandlerTest(unittest.TestCase):
 
     def test_validation_exception_uses_unified_shape(self):
         response = TestClient(app).post(
-            "/agent/invoke",
+            "/agent/stream",
             json={"message": 1},
             headers={"Authorization": f"Bearer {DEV_AUTH_TOKEN}"},
         )
