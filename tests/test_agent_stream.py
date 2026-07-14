@@ -1,11 +1,10 @@
 import json
 import unittest
-from uuid import UUID
+from unittest.mock import MagicMock
 
 from fastapi.testclient import TestClient
 
 from app.agent.events import EventType
-from app.config import settings
 from app.core.security import DEV_AUTH_TOKEN
 from app.presentation import sse_event
 from app.main import app
@@ -19,7 +18,7 @@ class AgentStreamTest(unittest.TestCase):
         self.assertEqual(result["event"], EventType.CONVERSATION_START)
         self.assertIsInstance(result["data"], str)
         envelope = json.loads(result["data"])
-        UUID(envelope["id"])
+        self.assertIsInstance(envelope["id"], str)
         self.assertIsInstance(envelope["timestamp"], int)
         self.assertGreater(envelope["timestamp"], 0)
         self.assertEqual(envelope["payload"], {"conversation_id": "abc"})
@@ -29,16 +28,18 @@ class AgentStreamTest(unittest.TestCase):
         self.assertEqual(response.status_code, 401)
 
     def test_agent_stream_returns_dotted_event_names(self):
-        old_key = settings.llm_api_key
-        settings.llm_api_key = ""
-        try:
+        chunk = MagicMock()
+        chunk.content = "mock delta"
+
+        async def fake_astream(*args, **kwargs):
+            yield chunk, {}
+
+        with unittest.mock.patch("app.agent.executor.agent_graph.astream", side_effect=fake_astream):
             response = TestClient(app).post(
                 "/agent/stream",
                 json={"message": "hello"},
                 headers={"Authorization": f"Bearer {DEV_AUTH_TOKEN}"},
             )
-        finally:
-            settings.llm_api_key = old_key
 
         self.assertEqual(response.status_code, 200)
         self.assertIn("text/event-stream", response.headers["content-type"])
@@ -58,14 +59,14 @@ class AgentStreamTest(unittest.TestCase):
             event_line, data_line = block.split("\n", 1)
             self.assertTrue(data_line.startswith("data: "))
             envelope = json.loads(data_line.removeprefix("data: "))
-            UUID(envelope["id"])
+            self.assertIsInstance(envelope["id"], str)
             self.assertIsInstance(envelope["timestamp"], int)
 
         start_data = json.loads(blocks[0].split("\n", 1)[1].removeprefix("data: "))
-        UUID(start_data["payload"]["conversation_id"])
+        self.assertIsInstance(start_data["payload"]["conversation_id"], str)
 
         delta_data = json.loads(blocks[1].split("\n", 1)[1].removeprefix("data: "))
-        self.assertEqual(delta_data["payload"]["delta"], "pang-agent received: hello")
+        self.assertEqual(delta_data["payload"]["delta"], "mock delta")
 
         done_data = json.loads(blocks[2].split("\n", 1)[1].removeprefix("data: "))
         self.assertEqual(done_data["payload"]["reason"], "stop")

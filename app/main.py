@@ -4,10 +4,12 @@ from app.api.router import api_router
 from app.core.exceptions import register_exception_handlers
 from app.core.logging import setup_logging
 from app.core.response import success
+from app.core.validation import validate_settings
 
 
 def create_app() -> FastAPI:
     setup_logging(settings.log_level)
+    validate_settings()
     application = FastAPI(title=settings.app_name)
     register_exception_handlers(application)
     application.include_router(api_router)

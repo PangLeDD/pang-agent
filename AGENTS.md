@@ -84,6 +84,7 @@ pang-agent/
 - **使用 `unittest`，不是 `pytest`**。没有 conftest.py，没有 fixture。
 - 测试文件命名：`tests/test_*.py`
 - 运行：`uv run python -m unittest discover -s tests -v`
+- **开发期间不主动写 unittest**：除非用户明确要求写测试，否则只实现功能代码，接口由用户自行测试验证。
 
 ### API 响应格式
 所有响应统一为 `{code: int, message: str, data: Any}`。必须使用 `app.core.response.success()` / `app.core.response.error_payload()` 构建，禁止手写结构。
