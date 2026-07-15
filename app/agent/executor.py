@@ -1,5 +1,7 @@
 from collections.abc import AsyncIterator
 
+from langchain_core.messages import HumanMessage
+
 from app.agent.events import AgentEvent, EventType
 from app.agent.factory import GraphFactory
 from app.container import get_container
@@ -11,14 +13,16 @@ class AgentExecutor:
     只通过 AgentEvent 流感知 Agent 的内部状态变化。
     """
 
-    def __init__(self, llm=None, graph_name: str = "chat") -> None:
-        self._graph = GraphFactory().create(graph_name, llm or get_container().ai.llm)
+    def __init__(self, llm=None, graph_name: str = "chat", checkpointer=None) -> None:
+        self._graph = GraphFactory().create(graph_name, llm or get_container().ai.llm, checkpointer)
 
-    async def run(self, message: str) -> AsyncIterator[AgentEvent]:
+    async def run(self, message: str, thread_id: str | None = None) -> AsyncIterator[AgentEvent]:
+        config = {"configurable": {"thread_id": thread_id or "default"}}
         yield AgentEvent(type=EventType.CONVERSATION_START)
 
         async for chunk_msg, _metadata in self._graph.astream(
-            {"message": message, "reply": ""},
+            {"messages": [HumanMessage(content=message)]},
+            config,
             stream_mode="messages",
         ):
             if chunk_msg.content:

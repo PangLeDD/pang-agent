@@ -14,5 +14,8 @@ def create_chat_service() -> ChatService:
 
     后续按需从 Container 注入 checkpointer、ToolRegistry 等依赖。
     """
-    executor = AgentExecutor(llm=get_container().ai.llm)
+    executor = AgentExecutor(
+        llm=get_container().ai.llm,
+        checkpointer=get_container().infra.checkpointer,
+    )
     return ChatService(executor=executor)

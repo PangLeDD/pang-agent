@@ -2,7 +2,7 @@ from fastapi import FastAPI
 
 from app.api.router import api_router
 from app.config import settings
-from app.container import init_container
+from app.container import get_container, init_container
 from app.core.exceptions import register_exception_handlers
 from app.core.logging import setup_logging
 from app.core.response import success
@@ -12,7 +12,8 @@ from app.core.validation import validate_settings
 def create_app() -> FastAPI:
     setup_logging(settings.log_level)
     validate_settings()
-    init_container()
+    container = init_container()
+    container.infra.init_checkpointer()
     application = FastAPI(title=settings.app_name)
     register_exception_handlers(application)
     application.include_router(api_router)

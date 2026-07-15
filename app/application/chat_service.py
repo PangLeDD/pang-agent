@@ -22,7 +22,7 @@ class ChatService:
         cid = conversation_id or str(uuid4())
 
         try:
-            async for event in self._executor.run(message):
+            async for event in self._executor.run(message, thread_id=cid):
                 if event.type == EventType.CONVERSATION_START:
                     event.payload["conversation_id"] = cid
                 yield sse_event(event.type, event.payload)

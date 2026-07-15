@@ -12,4 +12,4 @@ class ChatGraphBuilder:
         builder.add_node("llm", LLMNode(llm))
         builder.add_edge(START, "llm")
         builder.add_edge("llm", END)
-        return builder.compile()
+        return builder.compile(checkpointer=checkpointer)

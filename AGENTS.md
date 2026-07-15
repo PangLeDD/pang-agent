@@ -58,7 +58,7 @@ pang-agent/
 │   ├── agent/                    # 🧠 Agent/Domain 层：图运行、事件模型、prompt
 │   │   ├── chat/                 # 单一 chat 业务的图组件
 │   │   │   ├── builder.py        # ChatGraphBuilder：组装并编译图
-│   │   │   ├── state.py          # ChatState
+│   │   │   ├── state.py          # ChatState（继承 MessagesState，可追加业务字段）
 │   │   │   └── nodes/llm_node.py # LLMNode：单一模型调用能力
 │   │   ├── factory.py            # GraphFactory：选择 Builder 并创建 CompiledGraph
 │   │   ├── registry.py           # 多图注册边界（当前仅占位）
@@ -95,7 +95,7 @@ pang-agent/
 - 当前用户、请求参数等请求级上下文直接使用 FastAPI `Depends`，不放入 Container。
 - Container 由 `create_app()` 调用 `init_container()` 统一初始化；业务代码通过 `get_container()` 获取共享资源，不自行创建新的全局客户端。
 - LLM 客户端由 `AIContainer.llm` 懒初始化并复用；不重复构造 `ChatOpenAI`。
-- `InfraContainer.init_checkpointer()` 当前仍是占位；实现前不要假设 Checkpointer 已可用。
+- `InfraContainer.init_checkpointer()` 在 `create_app()` 中调用，用 PG 做 LangGraph 持久化；PG 不可用时仅记录警告不阻断启动。
 - 新增长生命周期资源时放入对应分域 Container；只有分域职责明显扩大后才新增 Container，不预先搭建 Provider、注册表或通用 IoC 框架。
 
 ### Agent 图架构
