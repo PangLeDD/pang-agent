@@ -34,7 +34,10 @@ class AgentStreamTest(unittest.TestCase):
         async def fake_astream(*args, **kwargs):
             yield chunk, {}
 
-        with unittest.mock.patch("app.agent.executor.agent_graph.astream", side_effect=fake_astream):
+        fake_graph = MagicMock()
+        fake_graph.astream.side_effect = fake_astream
+
+        with unittest.mock.patch("app.agent.executor.build_agent_graph", return_value=fake_graph):
             response = TestClient(app).post(
                 "/agent/stream",
                 json={"message": "hello"},

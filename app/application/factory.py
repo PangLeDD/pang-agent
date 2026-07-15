@@ -4,7 +4,9 @@
 Factory 按请求/对话创建短生命周期的 Service 对象。
 """
 
+from app.agent import AgentExecutor
 from app.application.chat_service import ChatService
+from app.container import get_container
 
 
 def create_chat_service() -> ChatService:
@@ -12,4 +14,5 @@ def create_chat_service() -> ChatService:
 
     后续按需从 Container 注入 checkpointer、ToolRegistry 等依赖。
     """
-    return ChatService()
+    executor = AgentExecutor(llm=get_container().ai.llm)
+    return ChatService(executor=executor)

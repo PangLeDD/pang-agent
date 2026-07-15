@@ -35,7 +35,7 @@ uv run uvicorn app.main:app --reload
 
 ## 架构
 
-分层设计：API → Application → Agent → Infrastructure，类似 Java MVC 但适配 Agent 场景。详细规范见 `docs/ARCHITECTURE.md`。
+分层设计：API → Application → Agent → Infrastructure，类似 Java MVC 但适配 Agent 场景。分层规范见 `docs/ARCHITECTURE.md`，对象生命周期设计参考 `docs/关于agent代码架构.md`。
 
 ```
 pang-agent/
@@ -49,7 +49,12 @@ pang-agent/
 │   │   ├── agent.py              # POST /agent/invoke, /stream, /llm-test
 │   │   └── users.py              # GET /users/me
 │   ├── application/              # 📦 Application 层：编排一次请求的完整流程
-│   │   └── chat_service.py       # ChatService → AgentExecutor → SSE
+│   │   ├── chat_service.py       # ChatService → AgentExecutor → SSE
+│   │   └── factory.py            # 按请求创建短生命周期 Service
+│   ├── container/                # 应用级 IoC，只管理全局共享资源
+│   │   ├── __init__.py           # AppContainer + init/get_container
+│   │   ├── ai.py                 # LLM 等 AI 长生命周期单例
+│   │   └── infra.py              # 数据库、缓存、Checkpointer 等基础设施资源
 │   ├── agent/                    # 🧠 Agent/Domain 层：图运行、事件模型、prompt
 │   │   ├── graph.py              # LangGraph 图定义 + invoke_agent()
 │   │   ├── executor.py           # AgentExecutor：跑图，产出 AgentEvent 流
@@ -79,6 +84,16 @@ pang-agent/
 ```
 
 ## 关键约定
+
+### 对象生命周期与依赖管理
+- 设计对象时先判断生命周期，再判断所属模块；不要把所有对象都注册进 Container。
+- `AppContainer` 只组合分域 Container；`AIContainer`、`InfraContainer` 只管理需要全局共享的应用级资源，例如 LLM 客户端、连接池、缓存和 Checkpointer。
+- `ChatService` 等短生命周期业务对象由 `app/application/factory.py` 按请求创建，通过 FastAPI `Depends` 注入；禁止把 Service 保存为 Container 单例。
+- 当前用户、请求参数等请求级上下文直接使用 FastAPI `Depends`，不放入 Container。
+- Container 由 `create_app()` 调用 `init_container()` 统一初始化；业务代码通过 `get_container()` 获取共享资源，不自行创建新的全局客户端。
+- LLM 客户端由 `AIContainer.llm` 懒初始化并复用；`app/infrastructure/llm/client.py` 是调用适配层，不重复构造 `ChatOpenAI`。
+- `InfraContainer.init_checkpointer()` 当前仍是占位；实现前不要假设 Checkpointer 已可用。
+- 新增长生命周期资源时放入对应分域 Container；只有分域职责明显扩大后才新增 Container，不预先搭建 Provider、注册表或通用 IoC 框架。
 
 ### 测试
 - **使用 `unittest`，不是 `pytest`**。没有 conftest.py，没有 fixture。
