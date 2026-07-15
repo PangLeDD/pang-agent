@@ -37,7 +37,7 @@ class AgentStreamTest(unittest.TestCase):
         fake_graph = MagicMock()
         fake_graph.astream.side_effect = fake_astream
 
-        with unittest.mock.patch("app.agent.executor.build_agent_graph", return_value=fake_graph):
+        with unittest.mock.patch("app.agent.factory.GraphFactory.create", return_value=fake_graph):
             response = TestClient(app).post(
                 "/agent/stream",
                 json={"message": "hello"},

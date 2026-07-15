@@ -1,6 +1,6 @@
 from typing import TypedDict
 
 
-class AgentState(TypedDict):
+class ChatState(TypedDict):
     message: str
     reply: str

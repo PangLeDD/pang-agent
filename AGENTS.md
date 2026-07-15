@@ -35,7 +35,7 @@ uv run uvicorn app.main:app --reload
 
 ## 架构
 
-分层设计：API → Application → Agent → Infrastructure，类似 Java MVC 但适配 Agent 场景。分层规范见 `docs/ARCHITECTURE.md`，对象生命周期设计参考 `docs/关于agent代码架构.md`。
+分层设计：API → Application → Agent，类似 Java MVC 但适配 Agent 场景。分层规范见 `docs/ARCHITECTURE.md`，对象生命周期设计参考 `docs/关于agent代码架构.md`。
 
 ```
 pang-agent/
@@ -56,17 +56,20 @@ pang-agent/
 │   │   ├── ai.py                 # LLM 等 AI 长生命周期单例
 │   │   └── infra.py              # 数据库、缓存、Checkpointer 等基础设施资源
 │   ├── agent/                    # 🧠 Agent/Domain 层：图运行、事件模型、prompt
-│   │   ├── graph.py              # LangGraph 图定义 + invoke_agent()
-│   │   ├── executor.py           # AgentExecutor：跑图，产出 AgentEvent 流
+│   │   ├── chat/                 # 单一 chat 业务的图组件
+│   │   │   ├── builder.py        # ChatGraphBuilder：组装并编译图
+│   │   │   ├── state.py          # ChatState
+│   │   │   └── nodes/llm_node.py # LLMNode：单一模型调用能力
+│   │   ├── factory.py            # GraphFactory：选择 Builder 并创建 CompiledGraph
+│   │   ├── registry.py           # 多图注册边界（当前仅占位）
+│   │   ├── executor.py           # AgentExecutor：取得并运行图，产出 AgentEvent 流
 │   │   ├── events.py             # AgentEvent 领域模型（LLM 和业务之间的防腐层）
 │   │   ├── prompt.py             # system/user prompt 构建
 │   │   ├── state.py              # AgentState TypedDict
 │   │   └── schema.py             # Agent DTO（请求/响应）
 │   ├── presentation/             # 🎨 Presentation 层：AgentEvent → 传输格式
 │   │   └── sse.py                # SSE 事件格式化
-│   ├── infrastructure/           # 🏗️ Infrastructure 层：外部系统适配器
-│   │   └── llm/
-│   │       └── client.py         # OpenAI-compatible LLM 客户端
+
 │   ├── core/                     # 🧱 核心基础设施
 │   │   ├── database.py           # SQLAlchemy async engine + session + Base
 │   │   ├── security.py           # 开发用 Bearer token 认证桩
@@ -91,9 +94,18 @@ pang-agent/
 - `ChatService` 等短生命周期业务对象由 `app/application/factory.py` 按请求创建，通过 FastAPI `Depends` 注入；禁止把 Service 保存为 Container 单例。
 - 当前用户、请求参数等请求级上下文直接使用 FastAPI `Depends`，不放入 Container。
 - Container 由 `create_app()` 调用 `init_container()` 统一初始化；业务代码通过 `get_container()` 获取共享资源，不自行创建新的全局客户端。
-- LLM 客户端由 `AIContainer.llm` 懒初始化并复用；`app/infrastructure/llm/client.py` 是调用适配层，不重复构造 `ChatOpenAI`。
+- LLM 客户端由 `AIContainer.llm` 懒初始化并复用；不重复构造 `ChatOpenAI`。
 - `InfraContainer.init_checkpointer()` 当前仍是占位；实现前不要假设 Checkpointer 已可用。
 - 新增长生命周期资源时放入对应分域 Container；只有分域职责明显扩大后才新增 Container，不预先搭建 Provider、注册表或通用 IoC 框架。
+
+### Agent 图架构
+- Graph 不是 Service。Service 只编排业务并调用 `AgentExecutor`，不负责拼装 Node、Edge 或编译图。
+- 按业务场景建立图目录，例如当前 `app/agent/chat/`；每个场景独立维护自己的 `state.py`、`nodes/` 和 `builder.py`。
+- Node 是最小能力单元：不知道 Graph 拓扑；一个 Node 文件只处理一项 AI 或业务动作。
+- Builder 只组装 StateGraph、Node、Edge 并 compile；运行时依赖（LLM、Checkpointer）从参数注入，不在 Builder 内获取 Container。
+- `GraphFactory` 根据 `graph_name` 选择 Builder 并创建图；`AgentExecutor` 只把图名与依赖交给 Factory 后执行，不直接定义图。
+- 第二种图出现前，不实现通用 `GraphRegistry`；`registry.py` 是明确的扩展边界。新增图时先新增业务目录和 Builder，再按需把 Builder 注册进 Factory/Registry。
+- Checkpointer、Tool、Memory 等尚未实现时，只在 Builder 参数或简短 `ponytail:` 注释中保留扩展点，不创建空实现。
 
 ### 测试
 - **使用 `unittest`，不是 `pytest`**。没有 conftest.py，没有 fixture。

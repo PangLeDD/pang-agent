@@ -1,9 +1,8 @@
 from collections.abc import AsyncIterator
 
 from app.agent.events import AgentEvent, EventType
-from app.agent.graph import build_agent_graph
-from app.infrastructure.llm import get_llm
-
+from app.agent.factory import GraphFactory
+from app.container import get_container
 
 class AgentExecutor:
     """Agent 运行时：执行 LangGraph 图，产出 AgentEvent 流。
@@ -12,8 +11,8 @@ class AgentExecutor:
     只通过 AgentEvent 流感知 Agent 的内部状态变化。
     """
 
-    def __init__(self, llm=None) -> None:
-        self._graph = build_agent_graph(llm or get_llm())
+    def __init__(self, llm=None, graph_name: str = "chat") -> None:
+        self._graph = GraphFactory().create(graph_name, llm or get_container().ai.llm)
 
     async def run(self, message: str) -> AsyncIterator[AgentEvent]:
         yield AgentEvent(type=EventType.CONVERSATION_START)
