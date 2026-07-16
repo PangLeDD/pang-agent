@@ -12,6 +12,7 @@ wheels/
 
 #idea
 .idea
+.opencode
 opencode.json
 .codegraph
 .jbeval

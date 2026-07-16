@@ -9,6 +9,7 @@ from app.core.exceptions import register_exception_handlers
 from app.core.logging import setup_logging
 from app.core.response import success
 from app.core.validation import validate_settings
+from app.schemas.common import APIResponse, RootData
 
 
 @asynccontextmanager
@@ -31,6 +32,6 @@ def create_app() -> FastAPI:
 app = create_app()
 
 
-@app.get("/")
-async def read_root() -> dict:
+@app.get("/", response_model=APIResponse[RootData])
+async def read_root():
     return success({"name": settings.app_name, "status": "ok"})
