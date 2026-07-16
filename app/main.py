@@ -1,3 +1,5 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 
 from app.api.router import api_router
@@ -9,12 +11,18 @@ from app.core.response import success
 from app.core.validation import validate_settings
 
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await get_container().infra.init_checkpointer()
+    yield
+    await get_container().infra.close()
+
+
 def create_app() -> FastAPI:
     setup_logging(settings.log_level)
     validate_settings()
-    container = init_container()
-    container.infra.init_checkpointer()
-    application = FastAPI(title=settings.app_name)
+    init_container()
+    application = FastAPI(title=settings.app_name, lifespan=lifespan)
     register_exception_handlers(application)
     application.include_router(api_router)
     return application

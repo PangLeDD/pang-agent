@@ -18,11 +18,11 @@ class ChatService:
         # 默认使用通用的 AgentExecutor
         self._executor = executor or AgentExecutor()
 
-    async def stream(self, message: str, conversation_id: str | None = None) -> AsyncIterator[dict[str, str]]:
+    async def stream(self, message: str, conversation_id: str | None, user_id: str) -> AsyncIterator[dict[str, str]]:
         cid = conversation_id or str(uuid4())
 
         try:
-            async for event in self._executor.run(message, thread_id=cid):
+            async for event in self._executor.run(message, thread_id=f"{user_id}:{cid}"):
                 if event.type == EventType.CONVERSATION_START:
                     event.payload["conversation_id"] = cid
                 yield sse_event(event.type, event.payload)
