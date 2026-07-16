@@ -14,5 +14,4 @@ class LLMNode:
         messages = [SystemMessage(content=build_system_prompt())]
         messages.extend(state["messages"])
         response = self._llm.invoke(messages)
-        content = response.content if isinstance(response.content, str) else str(response.content)
-        return {"messages": [AIMessage(content=content)]}
+        return {"messages": [response]}

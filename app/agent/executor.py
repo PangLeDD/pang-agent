@@ -1,10 +1,11 @@
 from collections.abc import AsyncIterator
 
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import HumanMessage, AIMessageChunk
 
 from app.agent.events import AgentEvent, EventType
 from app.agent.factory import GraphFactory
 from app.container import get_container
+
 
 class AgentExecutor:
     """Agent 运行时：执行 LangGraph 图，产出 AgentEvent 流。
@@ -21,11 +22,11 @@ class AgentExecutor:
         yield AgentEvent(type=EventType.CONVERSATION_START)
 
         async for chunk_msg, _metadata in self._graph.astream(
-            {"messages": [HumanMessage(content=message)]},
-            config,
-            stream_mode="messages",
+                {"messages": [HumanMessage(content=message)]},
+                config,
+                stream_mode="messages",
         ):
-            if chunk_msg.content:
+            if isinstance(message, AIMessageChunk) and chunk_msg.content:
                 yield AgentEvent(type=EventType.MESSAGE_DELTA, payload={"delta": chunk_msg.content})
 
         yield AgentEvent(type=EventType.CONVERSATION_END, payload={"reason": "stop"})
