@@ -1,1 +1,1 @@
-"""Reusable chat graph nodes."""
+"""可复用的聊天图节点。"""

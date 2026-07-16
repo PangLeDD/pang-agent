@@ -1,1 +1,1 @@
-"""Chat Agent graph components."""
+"""聊天 Agent 图组件。"""

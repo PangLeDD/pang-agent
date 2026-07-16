@@ -56,7 +56,7 @@ class InfraContainerTest(unittest.IsolatedAsyncioTestCase):
         """未初始化连接时 close() 应安全无操作。"""
         container = InfraContainer()
 
-        # Should not raise
+        # 不应抛出异常。
         await container.close()
 
     async def test_lifespan_raises_when_init_checkpointer_fails(self):

@@ -2,7 +2,7 @@ from app.agent.chat.builder import ChatGraphBuilder
 
 
 class GraphFactory:
-    """Select a graph builder and compile a graph for one executor."""
+    """选择图构建器，并为一个执行器编译图。"""
 
     _builders = {"chat": ChatGraphBuilder}
 

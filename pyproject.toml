@@ -16,6 +16,7 @@ dependencies = [
     "langsmith>=0.9.7",
     "loguru>=0.7.3",
     "passlib[bcrypt]>=1.7.4",
+    "psycopg2-binary>=2.9.12",
     "psycopg[binary]>=3.3.4",
     "pydantic-settings>=2.14.2",
     "python-jose[cryptography]>=3.5.0",

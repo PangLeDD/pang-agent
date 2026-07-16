@@ -1,3 +1,3 @@
-"""Graph registration boundary."""
+"""图注册扩展边界。"""
 
-# ponytail: add GraphRegistry when a second graph type needs runtime registration.
+# ponytail: 第二种图需要运行时注册时再引入 GraphRegistry。

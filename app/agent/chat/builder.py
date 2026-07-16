@@ -5,7 +5,7 @@ from app.agent.chat.state import ChatState
 
 
 class ChatGraphBuilder:
-    """Assemble and compile the chat graph."""
+    """组装并编译聊天图。"""
 
     def build(self, llm, checkpointer=None):
         builder = StateGraph(ChatState)

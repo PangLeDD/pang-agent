@@ -26,7 +26,7 @@ class AgentExecutor:
                 config,
                 stream_mode="messages",
         ):
-            if isinstance(message, AIMessageChunk) and chunk_msg.content:
+            if isinstance(chunk_msg, AIMessageChunk) and chunk_msg.content:
                 yield AgentEvent(type=EventType.MESSAGE_DELTA, payload={"delta": chunk_msg.content})
 
         yield AgentEvent(type=EventType.CONVERSATION_END, payload={"reason": "stop"})

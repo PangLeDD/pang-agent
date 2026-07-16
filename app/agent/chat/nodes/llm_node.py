@@ -5,7 +5,7 @@ from app.agent.prompt import build_system_prompt
 
 
 class LLMNode:
-    """Invoke the configured LLM without knowing the graph topology."""
+    """调用已配置的 LLM，不感知图拓扑。"""
 
     def __init__(self, llm) -> None:
         self._llm = llm
